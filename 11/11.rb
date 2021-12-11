@@ -19,10 +19,9 @@ end
 def flash_all(a, flashed)
   flash = false
   a.each_index do |y|
-    a.each_index do |x|
+    a[y].each_index do |x|
       if !flashed.include?([y, x]) && a[y][x] > 9
         flashed.push([y, x])
-        # increment neighbours
         do_the_wave(a, y, x)
         flash = true
       end
@@ -39,18 +38,14 @@ while true
   arr = arr.map { |r| r.map { |c| c += 1 } }
   # flash them!
   flashed = []
-  flash = flash_all(arr, flashed)
-  while flash
-    flash = flash_all(arr, flashed)
-  end
+  flash = true
+  flash = flash_all(arr, flashed) while flash
   # reset them to 0 if flashed
   flashed.each { |c| y, x = c; arr[y][x] = 0 }
 
   total_flashes += flashed.size
-  if counter == 100
-    puts "part 1: #{total_flashes}"
-  end
-  if flashed.size == 100
+  puts "part 1: #{total_flashes}" if counter == 100
+  if flashed.size == arr.flatten.size
     puts "part 2: #{counter}"
     return
   end
