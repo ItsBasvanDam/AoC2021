@@ -17,9 +17,9 @@ end
 puts points.map { |i| arr[i[1]][i[0]] }.reduce(:+) + points.size
 
 # part 2
-def fill_basin_recurse(basin, a, x, y, covered = [])
-  return if covered.include?([y, x])
-  covered.push([y, x])
+def fill_basin_recurse(basin, a, x, y, covered)
+  return if covered.has_key?([y, x])
+  covered[[y, x]] = 0
   return if a[y][x] == 9
   if y > 0
     fill_basin_recurse(basin, a, x, y - 1, covered)
@@ -36,16 +36,16 @@ def fill_basin_recurse(basin, a, x, y, covered = [])
   basin.push([a[y][x], y, x])
 end
 
+# use Hash for covered list, since has_key? operates at O(1) speed
+covered = Hash.new
 basins = []
 x, y = 0, 0
-# floodfill the entire board, brute force style
-# could be optimized by skipping the points which are already part of a discovered basin
 (0...arr.size).each do |yc|
   y = yc
   (0...arr[yc].size).each do |xc|
     x = xc
     basin = []
-    fill_basin_recurse(basin, arr, x, y)
+    fill_basin_recurse(basin, arr, x, y, covered)
     if basin.size > 0 && !basins.any? { |b| (b - basin).empty? }
       basins.push(basin)
     end
