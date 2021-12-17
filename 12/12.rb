@@ -7,35 +7,27 @@ File.readlines("input").map do |l|
   connections[to].push(from)
 end
 
-def single_small_cave(path, cave)
-  small_caves = path.filter { |e| /[[:lower:]]/.match(e) }
-  pair = small_caves.group_by { |c| c }.values.any? { |a| a.size == 2 }
-  if pair
-    return path.count { |c| c == cave } < 1
-  else
-    return true
-  end
-end
-
-def walk_paths_recurse(conns, curr, path, paths, checker)
+def walk_paths_recurse(conns, curr, path, paths, checker, has_duplicate = false, duplicate = nil)
   pa = path.dup
+  duplicate = curr if pa.include?(curr) && /[[:lower:]]/.match(curr) && duplicate == nil
+  has_duplicate = duplicate != nil
   pa.push(curr)
   if curr == "end"
     paths.push(pa)
     return
   end
   conns[curr].each do |out|
-    walk_paths_recurse(conns, out, pa, paths, checker) if checker.call(pa, out)
+    walk_paths_recurse(conns, out, pa, paths, checker, has_duplicate, duplicate) if checker.call(pa, out, has_duplicate, duplicate)
   end
 end
 
-part_1_requirements = ->(pa, out) do
+part_1_requirements = ->(pa, out, has_duplicate, duplicate) do
   large_cave = /[[:upper:]]/.match(out) != nil
   return out == "end" || large_cave || (!large_cave && !pa.include?(out))
 end
-part_2_requirements = ->(pa, out) do
+part_2_requirements = ->(pa, out, has_duplicate, duplicate) do
   large_cave = /[[:upper:]]/.match(out) != nil
-  return out == "end" || (out != "start" && (large_cave || single_small_cave(pa, out)))
+  return out == "end" || (out != "start" && (large_cave || (!has_duplicate || (duplicate != out && !pa.include?(out)))))
 end
 
 # part 1 & 2
